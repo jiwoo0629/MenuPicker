@@ -25,7 +25,9 @@
 		localStorage.setItem("lunch_menu", JSON.stringify(menuList, null, 3));
 		return true;
 	}
+	function updateDup() { //방문한지 일주일 지나면, dup = false, 
 
+	}
 
 
 </script>
