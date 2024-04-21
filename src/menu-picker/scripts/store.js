@@ -12,8 +12,8 @@ export const defaultMenu = [
 //    { "name": '오토김밥', "category": '한식', "description": '분식, 김밥', "visitDate": '2024/04/01'', "dup": false, },
     { "name": '샤오바오', "category": '중식', "description": '탄탄면', "visitDate": '2024/04/01', "dup": false, },
 //    { "name": '슬로우캘리', "category": '카페', "description": '샐러드', "visitDate": '2024/04/01', "dup": false, },
-    { "name": '미분당', "category": '동남아', "description": '베트남', "visitDate": '2024/04/01', "dup": false, },
-    { "name": '나이쏘이', "category": '동남아', "description": '태국', "visitDate": '2024/04/01', "dup": false, },
+    { "name": '미분당', "category": '동남아(베트남)', "description": '베트남', "visitDate": '2024/04/01', "dup": false, },
+    { "name": '나이쏘이', "category": '동남아(태국)', "description": '태국', "visitDate": '2024/04/01', "dup": false, },
     { "name": '불독 돈까스', "category": '한식', "description": '돈까스', "visitDate": '2024/04/01', "dup": false, },
     { "name": '양평해장국', "category": '한식', "description": '국밥, 해장국', "visitDate": '2024/04/01', "dup": false, },
     { "name": '청담초밥', "category": '일식', "description": '초밥', "visitDate": '2024/04/01', "dup": false, },
@@ -23,9 +23,9 @@ export const defaultMenu = [
     { "name": '강남면옥', "category": '한식', "description": '갈비탕, 냉면', "visitDate": '2024/04/01', "dup": false, },
     { "name": '나무젓가락', "category": '일식', "description": '라멘, 마제소바', "visitDate": '2024/04/01', "dup": false, },
     { "name": '석정', "category": '일식', "description": '초밥, 탕', "visitDate": '2024/04/01', "dup": false, },
-    { "name": '씨즐', "category": '기타(멕시칸)', "description": '멕시칸, 타코, 파히타', "visitDate": '2024/04/01', "dup": false, },
-    { "name": '문정돈', "category": '기타(고기)', "description": '고기', "visitDate": '2024/04/01', "dup": false, },
+    { "name": '씨즐', "category": '멕시칸', "description": '멕시칸, 타코, 파히타', "visitDate": '2024/04/01', "dup": false, },
+    { "name": '문정돈', "category": '고기', "description": '고기', "visitDate": '2024/04/01', "dup": false, },
     { "name": '녹정', "category": '한식', "description": '샤브샤브', "visitDate": '2024/04/01', "dup": false, },
     { "name": '틈새라면', "category": '한식', "description": '분식', "visitDate": '2024/04/01', "dup": false, },
-    
+
 ];
