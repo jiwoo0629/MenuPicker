@@ -6,6 +6,7 @@
     import { select, selectAll } from '../../scripts/d3';
     import { popupAdd } from './scripts/popup_add';
     import { popupSelect } from './scripts/popup_select'; 
+    import FileSaver from './scripts/FileSaver';
     
     let selectedMenus = [];
     
@@ -21,6 +22,10 @@
         let lunch_menu = localStorage.getItem('lunch_menu');
         lunch_menu = JSON.parse(lunch_menu);
         if(!lunch_menu) lunch_menu = defaultMenu;
+        lunch_menu.sort(function(a, b) {
+            if(a.name < b.name) return -1;
+            if(a.name > b.name) return 1;
+        });
         return lunch_menu;
     }
     function setMenu(menuList) {
@@ -30,22 +35,22 @@
         localStorage.setItem("lunch_menu", JSON.stringify(menuList, 3, null));
         selectedMenus = menuList;
         return true;
-    }
-    function updateDup(menu) { //방문한지 일주일 지나면, dup = false, 
-        if(menu.dup && new Date().getTime() - new Date(menu.visitDate).getTime() >= 7 * 24 * 60 * 60 * 1000) {
-            menu.dup = false;
+        
+        function updateDup(menu) { //방문한지 일주일 지나면, dup = false, 
+            if(menu.dup && new Date().getTime() - new Date(menu.visitDate).getTime() >= 7 * 24 * 60 * 60 * 1000) {
+                menu.dup = false;
+            }
         }
     }
     function searchMenu() { //메뉴 검색 결과 보여주기
-        var menus = get(menuStore);
+        const menus = get(menuStore);
         var option = select("#search_option").property("value");
         selectedMenus = menus.filter((menu) => menu.name.includes(option) || menu.category.includes(option) || menu.description.includes(option));
-        
     }
     function removeMenu(menu) { //메뉴 리스트에서 메뉴 제거
         var confirm = window.confirm("이 메뉴를 리스트에서 삭제하시겠습니까?");
         if(confirm) {
-            var menus = get(menuStore);
+            const menus = get(menuStore);
             var new_menus = menus.filter(m => m.name != menu.name);
             menuStore.set(new_menus);
             localStorage.setItem("lunch_menu", JSON.stringify(new_menus, 3, null));
@@ -55,7 +60,30 @@
     }
     function addMenu() { popupAdd(); }
     function selectMenu() { popupSelect(); }
-    
+    function saveData() {
+        const menuJson = JSON.stringify(selectedMenus, null, 3);
+        let file = new Blob([menuJson], {type: "text/plain; charset=utf-8;"});
+        let date = new Date();
+        let time = date.getFullYear().toString() + (date.getMonth()+1).toString().padStart(2, '0') + date.getDate().toString().padStart(2, '0') + "-" + date.getHours().toString().padStart(2, '0') + date.getMinutes().toString().padStart(2, '0') + date.getSeconds().toString().padStart(2, '0'); 
+        FileSaver.saveAs(file, 'menulist_' + time + '.json');
+    }
+    function loadData() {
+        let input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".json";
+        input.onchange = e => processDataFile(e.target.files[0]);
+        input.click();
+        
+        function processDataFile(file) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                let menulist = JSON.parse(reader.result);
+                localStorage.setItem("lunch_menu", JSON.stringify(menulist, 3, null));
+                window.location.reload();
+            }
+            reader.readAsText(file);
+        }
+    }
     </script>
     
     <main>
@@ -64,6 +92,8 @@
             <input type="text" id="search_option" name="search_option" autocomplete="off" placeholder="가게명 / 카테고리 / 설명 검색" on:keypress={(e) => {if(e.key == 'Enter') searchMenu()}}/>
             <button type="button" id="search_btn" on:click={searchMenu}>검색</button>
             <div id="actions">
+                <button type="button" class="action_btn" on:click={saveData}>데이터 저장하기</button>
+                <button type="button" class="action_btn" on:click={loadData}>데이터 불러오기</button>
                 <button type="button" class="action_btn" on:click={addMenu}>가게 추가하기</button>
                 <button type="button" class="action_btn" on:click={selectMenu}>추첨하기</button>
             </div>
