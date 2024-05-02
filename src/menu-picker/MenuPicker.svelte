@@ -5,7 +5,7 @@
     import { w2grid, w2popup, w2alert, w2ui } from '../../scripts/w2ui-2.0.es6';
     import { select, selectAll } from '../../scripts/d3';
     import { popupAdd } from './scripts/popup_add';
-    //import { popupSelect } from './scripts/popup_select'; 
+    import { popupSelect } from './scripts/popup_select'; 
     
     let selectedMenus = [];
     
@@ -31,12 +31,8 @@
         selectedMenus = menuList;
         return true;
     }
-    function setDup(menu) { //가게 선택을 확정지으면 dup = true, 방문날짜 설정
-        menu.dup = true;
-        menu.visitDate = new Date().getFullYear() + "/" + new Date().getMonth() + "/" + new Date().getDate();
-    }
     function updateDup(menu) { //방문한지 일주일 지나면, dup = false, 
-        if(menu.dup && new Date().getTime() - new Date(menu.visitDate).getTime() >= 7) {
+        if(menu.dup && new Date().getTime() - new Date(menu.visitDate).getTime() >= 7 * 24 * 60 * 60 * 1000) {
             menu.dup = false;
         }
     }
@@ -58,7 +54,7 @@
         } else ;
     }
     function addMenu() { popupAdd(); }
-    function selectMenu() { }
+    function selectMenu() { popupSelect(); }
     
     </script>
     
@@ -73,19 +69,19 @@
             </div>
         </div>
         <div id="label_container" style="width: 80%; left:10%; margin-top: 1em; padding: 1em 0; background:rgba(0,0,0,0.05); ">
-            <div class="label" style="width:15%;">가게명</div>
-            <div class="label" style="width:15%;">카테고리</div>
+            <div class="label" style="width:20%;">가게명</div>
+            <div class="label" style="width:20%;">카테고리</div>
             <div class="label" style="width:30%;">설명</div>
-            <div class="label" style="width:30%;">최근 방문일자</div>
+            <div class="label" style="width:20%;">최근 방문일자</div>
             <div class="label" style="width:10%; border:0;"></div>
         </div>
-        <div id="container" style="height:{selectedMenus.length * 36 < 400 ? selectedMenus.length * 36 + "px" : "400px"}">
+        <div id="container" style="height:{selectedMenus.length * 36 < window.innerHeight * 0.6 ? selectedMenus.length * 36 + "px" : window.innerHeight * 0.6 + "px"}">
             {#each selectedMenus as menu}
             <div id="label_container" style="height: 36px;">
-                <div class="label" style="width:15%;">{menu.name}</div>
-                <div class="label" style="width:15%;">{menu.category}</div>
+                <div class="label" style="width:20%;">{menu.name}</div>
+                <div class="label" style="width:20%;">{menu.category}</div>
                 <div class="label" style="width:30%;">{menu.description}</div>
-                <div class="label" style="width:30%;">{menu.visitDate}</div>
+                <div class="label" style="width:20%;">{menu.visitDate === "2024/04/01" ? "-" : menu.visitDate}</div>
                 <div class="label" style="width:10%; border:0;">
                     <button type="button" class="delete" on:click={removeMenu(menu)}>삭제</button>	
                 </div>
@@ -123,7 +119,7 @@
     #search_btn {
         position: relative;
         height: 40px;
-        border: 2px solid lightgray;
+        border: 1px solid lightgray;
         border-radius: 5px;
         text-align: center;
         background: white;
@@ -140,7 +136,7 @@
     .action_btn {
         position: relative;
         height: 40px;
-        border: 2px solid lightgray;
+        border: 1px solid lightgray;
         border-radius: 5px;
         margin-left: 1%;
         text-align: center;
@@ -184,7 +180,7 @@
     }
     
     
-    @media (min-width: 640px) {
+    @media (min-width: 1080px) {
         main {
             max-width: none;
         }

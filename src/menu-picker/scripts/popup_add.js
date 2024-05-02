@@ -38,10 +38,18 @@ function addMenu() {
     else if(select("#description").property("value") == "")
         alert("설명을 입력하세요")
     else {
+        const menus = get(menuStore);
+        const dupMenu = menus.filter(menu => menu.name === select("#name").property("value"));
+        if(dupMenu.length > 0) {
+            alert("해당 메뉴가 이미 리스트에 존재합니다.")
+            select("#name").property("value", "");
+            select("#category_select").property("value", "");
+            select("#description").property("value", "")
+            return;
+        }
         var confirm = window.confirm("이 가게 정보를 추가하시겠습니까?")
         if(!confirm) return;
         else {
-            const menus = get(menuStore);
             var menu = {
                 "name": select("#name").property("value"), 
                 "category": (select("#category_select").property("value") == "self") ? select("#category").property("value") : select("#category_select").property("value"),
@@ -141,8 +149,8 @@ function appendSelfInput(g, text, id, arr) {
 function appendButton(g, text, id, arr) {
     g.attr("id", id)
     .style("cursor", "pointer")
-    .on('mouseover', function () { g.select('rect').style("fill", "#fff") })
-    .on('mouseout', function () { g.select('rect').style("fill", "#eee") });
+    .on('mouseover', function () { g.select('rect').style("fill", "#eee") })
+    .on('mouseout', function () { g.select('rect').style("fill", "#fff") });
 
     g.append('rect')
         .attr("width", arr[0]) //width
@@ -152,8 +160,8 @@ function appendButton(g, text, id, arr) {
         .attr("x", arr[2]) //x
         .attr("y", arr[3]) //y
         .style("stroke", "lightgray")
-        .style("stroke-width", "2px")
-        .style("fill", "#eee")
+        .style("stroke-width", 1)
+        .style("fill", "#fff")
 
     g.append('text')
         .attr("x", arr[4]) //text_x
