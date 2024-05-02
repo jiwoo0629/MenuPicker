@@ -2,13 +2,15 @@
     import { onMount } from "svelte";
     import { menuStore, defaultMenu } from "./scripts/store";
     import { get } from "svelte/store";
-    import { w2grid, w2popup, w2alert, w2ui } from '../../scripts/w2ui-2.0.es6';
     import { select, selectAll } from '../../scripts/d3';
     import { popupAdd } from './scripts/popup_add';
+    import { popupUpdate } from './scripts/popup_update';
     import { popupSelect } from './scripts/popup_select'; 
     import FileSaver from './scripts/FileSaver';
     
     let selectedMenus = [];
+    let mainMenuList = [];
+    let page = 0;
     
     onMount(() => {
         setup();
@@ -33,7 +35,7 @@
         menuList.forEach(menu => updateDup(menu));
         menuStore.set(menuList);
         localStorage.setItem("lunch_menu", JSON.stringify(menuList, 3, null));
-        selectedMenus = menuList;
+        showMenu(menuList);
         return true;
         
         function updateDup(menu) { //방문한지 일주일 지나면, dup = false, 
@@ -45,8 +47,25 @@
     function searchMenu() { //메뉴 검색 결과 보여주기
         const menus = get(menuStore);
         var option = select("#search_option").property("value");
-        selectedMenus = menus.filter((menu) => menu.name.includes(option) || menu.category.includes(option) || menu.description.includes(option));
+        var filteredMenu = menus.filter((menu) => menu.name.includes(option) || menu.category.includes(option) || menu.description.includes(option));
+        showMenu(filteredMenu);
     }
+    function showMenu(menuList) {
+        var idx = 0, arr = [];
+        selectedMenus = [];
+        while(idx < menuList.length) {
+            arr.push(menuList[idx]);
+            idx++;
+            if(idx % 15 == 0) {
+                selectedMenus.push(arr);
+                arr = [];
+            }
+        }
+        if(arr.length !== 0) selectedMenus.push(arr);
+        page = 0;
+        mainMenuList = selectedMenus[page];
+    }
+
     function removeMenu(menu) { //메뉴 리스트에서 메뉴 제거
         var confirm = window.confirm("이 메뉴를 리스트에서 삭제하시겠습니까?");
         if(confirm) {
@@ -61,7 +80,8 @@
     function addMenu() { popupAdd(); }
     function selectMenu() { popupSelect(); }
     function saveData() {
-        const menuJson = JSON.stringify(selectedMenus, null, 3);
+        const menuList = get(menuStore);
+        const menuJson = JSON.stringify(menuList, null, 3);
         let file = new Blob([menuJson], {type: "text/plain; charset=utf-8;"});
         let date = new Date();
         let time = date.getFullYear().toString() + (date.getMonth()+1).toString().padStart(2, '0') + date.getDate().toString().padStart(2, '0') + "-" + date.getHours().toString().padStart(2, '0') + date.getMinutes().toString().padStart(2, '0') + date.getSeconds().toString().padStart(2, '0'); 
@@ -84,6 +104,14 @@
             reader.readAsText(file);
         }
     }
+    function pageLeft() {
+        page--;
+        mainMenuList = selectedMenus[page];
+    }
+    function pageRight() {
+        page++;
+        mainMenuList = selectedMenus[page];
+    }
     </script>
     
     <main>
@@ -103,20 +131,30 @@
             <div class="label" style="width:20%;">카테고리</div>
             <div class="label" style="width:30%;">설명</div>
             <div class="label" style="width:20%;">최근 방문일자</div>
-            <div class="label" style="width:10%; border:0;"></div>
+            <div class="label" style="width:10%; border:0;">수정 / 삭제</div>
         </div>
-        <div id="container" style="height:{selectedMenus.length * 36 < window.innerHeight * 0.6 ? selectedMenus.length * 36 + "px" : window.innerHeight * 0.6 + "px"}">
-            {#each selectedMenus as menu}
-            <div id="label_container" style="height: 36px;">
+        <div id="container" style="height:{mainMenuList.length * 37 < window.innerHeight * 0.5 ? mainMenuList.length * 37 + "px" : window.innerHeight * 0.5 + "px"}">
+            {#each mainMenuList as menu}
+            <div id="label_container" style="height:36px;">
                 <div class="label" style="width:20%;">{menu.name}</div>
                 <div class="label" style="width:20%;">{menu.category}</div>
                 <div class="label" style="width:30%;">{menu.description}</div>
                 <div class="label" style="width:20%;">{menu.visitDate === "2024/04/01" ? "-" : menu.visitDate}</div>
                 <div class="label" style="width:10%; border:0;">
+                    <button type="button" class="delete" style="color: blue;" on:click={popupUpdate(menu)}>수정</button>	
                     <button type="button" class="delete" on:click={removeMenu(menu)}>삭제</button>	
                 </div>
             </div>
             {/each}
+        </div>
+        <div id="page_container">
+            {#if page > 0}
+            <button type="button" style="position: absolute; left: calc(50% - 90px); border:0; background: none; font-size:24px; font-weight:600; cursor:pointer;" on:click={pageLeft}> ⇦ </button>
+            {/if}
+            <b style="position: absolute; top: 13px;">{15 * page} - { (15 * page + (mainMenuList.length - 1) < 15 * (page+1) - 1) ? 15 * page + (mainMenuList.length - 1) : 15 * (page + 1) - 1 }</b>
+            {#if page < selectedMenus.length - 1}
+            <button style="position: absolute; left: calc(50% + 100px); border:0; background: none; font-size:24px; font-weight:600; cursor:pointer;" on:click={pageRight}> ⇨ </button>
+            {/if}
         </div>
     </main>
     
@@ -208,7 +246,11 @@
         overflow-y: scroll;
         border-bottom: 1px solid black;
     }
-    
+    #page_container {
+        position: relative;
+        top: 50px;
+        text-align: center;
+    }
     
     @media (min-width: 1080px) {
         main {
