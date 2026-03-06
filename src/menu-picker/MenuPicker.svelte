@@ -11,6 +11,8 @@
     let selectedMenus = [];
     let mainMenuList = [];
     let page = 0;
+
+    const itemPerPage = 10;
     
     onMount(() => {
         setup();
@@ -56,7 +58,7 @@
         while(idx < menuList.length) {
             arr.push(menuList[idx]);
             idx++;
-            if(idx % 15 == 0) {
+            if(idx % itemPerPage == 0) {
                 selectedMenus.push(arr);
                 arr = [];
             }
@@ -133,13 +135,13 @@
             <div class="label" style="width:20%;">최근 방문일자</div>
             <div class="label" style="width:10%; border:0;">수정 / 삭제</div>
         </div>
-        <div id="container" style="height:{mainMenuList.length * 37 < window.innerHeight * 0.5 ? mainMenuList.length * 37 + "px" : window.innerHeight * 0.5 + "px"}">
+        <div id="container" style="height:{mainMenuList.length * 41 < window.innerHeight * 0.5 ? mainMenuList.length * 41 + "px" : window.innerHeight * 0.5 + "px"}">
             {#each mainMenuList as menu}
-            <div id="label_container" style="height:36px;">
+            <div id="label_container" style="height:40px;">
                 <div class="label" style="width:20%;">{menu.name}</div>
                 <div class="label" style="width:20%;">{menu.category}</div>
                 <div class="label" style="width:30%;">{menu.description}</div>
-                <div class="label" style="width:20%;">{menu.visitDate === "2024/04/01" ? "-" : menu.visitDate}</div>
+                <div class="label" style="width:20%;">{menu.visitDate === "1970/01/01" ? "-" : menu.visitDate}</div>
                 <div class="label" style="width:10%; border:0;">
                     <button type="button" class="delete" style="color: blue;" on:click={popupUpdate(menu)}>수정</button>	
                     <button type="button" class="delete" on:click={removeMenu(menu)}>삭제</button>	
@@ -151,7 +153,7 @@
             {#if page > 0}
             <button type="button" style="position: absolute; left: calc(50% - 90px); border:0; background: none; font-size:24px; font-weight:600; cursor:pointer;" on:click={pageLeft}> ⇦ </button>
             {/if}
-            <b style="position: absolute; top: 13px;">{15 * page} - { (15 * page + (mainMenuList.length - 1) < 15 * (page+1) - 1) ? 15 * page + (mainMenuList.length - 1) : 15 * (page + 1) - 1 }</b>
+            <b style="position: absolute; top: 13px;">{itemPerPage * page} - { (itemPerPage * page + (mainMenuList.length - 1) < itemPerPage * (page+1) - 1) ? itemPerPage * page + (mainMenuList.length - 1) : itemPerPage * (page + 1) - 1 }</b>
             {#if page < selectedMenus.length - 1}
             <button style="position: absolute; left: calc(50% + 100px); border:0; background: none; font-size:24px; font-weight:600; cursor:pointer;" on:click={pageRight}> ⇨ </button>
             {/if}

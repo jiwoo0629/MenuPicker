@@ -151,7 +151,7 @@ function showPopup() {
             menulist.forEach(m => {
                 if(m.name === menu.name) {
                     var date = new Date();
-                    m.visitDate = date.getFullYear() + "/" + (date.getMonth()+1) + "/" + date.getDate();
+                    m.visitDate = date.getFullYear() + "/" + String(date.getMonth()+1).padStart(2, '0') + "/" + String(date.getDate()).padStart(2, '0');
                     m.dup = true;
                 }
             })
