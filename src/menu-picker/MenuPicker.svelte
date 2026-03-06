@@ -1,6 +1,9 @@
 <script>
+    // https://www.dogumaster.com/select/menu (메뉴선택 프로그램 예시)
+    // https://apis.map.kakao.com/web/sample/basicMap/ (kakao API 사용법)
+
     import { onMount } from "svelte";
-    import { menuStore, defaultMenu } from "./scripts/store";
+    import { menuStore, defaultMenu, kakaoAPI } from "./scripts/store";
     import { get } from "svelte/store";
     import { select, selectAll } from '../../scripts/d3';
     import { popupAdd } from './scripts/popup_add';
@@ -14,10 +17,63 @@
 
     const itemPerPage = 10;
     
-    onMount(() => {
+    function loadKakaoMap() {
+        return new Promise((resolve, reject) => {
+            if(typeof kakao === 'object') {
+                resolve();
+                return;
+            }
+            const script = document.createElement('script');
+            script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoAPI}&libraries=services&autoload=false`;
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error('Failed to load the Kakao Maps API script'));
+            document.head.appendChild(script);
+        });
+    }
+    onMount(async () => {
+        try {
+            await loadKakaoMap();
+            kakao.maps.load(() => {
+                const mapContainer = document.getElementById('kakaomap');
+                const options = {
+                    center: new kakao.maps.LatLng(37.48598586879175, 127.11974501609802), //문정동 SK V1 기준
+                    level: 3
+                };
+                const map = new kakao.maps.Map(mapContainer, options);
+                const ps = new kakao.maps.services.Places(map);
+                ps.categorySearch('FD6', placeSearchCB, {useMapBounds: true}); //음식점 카테고리로 검색
+
+                // 마커를 클릭하면 장소명을 표출할 인포윈도우 입니다
+                var infowindow = new kakao.maps.InfoWindow({zIndex:1});
+                function placeSearchCB(data, status, pagination) {
+                    if(status === kakao.maps.services.Status.OK) {
+                        for(var i=0; i<data.length; i++) {
+                            displayMarker(data[i]);
+                        }
+                    }
+                }
+                function displayMarker(place) {
+                    
+                    // 마커를 생성하고 지도에 표시합니다
+                    var marker = new kakao.maps.Marker({
+                        map: map,
+                        position: new kakao.maps.LatLng(place.y, place.x) 
+                    });
+
+                    // 마커에 클릭이벤트를 등록합니다
+                    kakao.maps.event.addListener(marker, 'click', function() {
+                        // 마커를 클릭하면 장소명이 인포윈도우에 표출됩니다
+                        infowindow.setContent('<div style="padding:5px;font-size:12px;">' + place.place_name + '</div>');
+                        infowindow.open(map, marker);
+                    });
+                }
+            })
+        } catch(err) {
+            console.log(err);
+        }
         setup();
     });
-    
+
     function setup() {
         const menuList = getMenu(); //점심 메뉴 리스트 받아오기
         setMenu(menuList); //점심 메뉴 리스트 설정
@@ -114,7 +170,7 @@
         page++;
         mainMenuList = selectedMenus[page];
     }
-    </script>
+</script>
     
     <main>
         <h1>점심 메뉴 추첨 프로그램</h1>
@@ -128,6 +184,8 @@
                 <button type="button" class="action_btn" on:click={selectMenu}>추첨하기</button>
             </div>
         </div>
+        <div id="kakaomap"></div>
+<!--
         <div id="label_container" style="width: 80%; left:10%; margin-top: 1em; padding: 1em 0; background:rgba(0,0,0,0.05); ">
             <div class="label" style="width:20%;">가게명</div>
             <div class="label" style="width:20%;">카테고리</div>
@@ -158,9 +216,10 @@
             <button style="position: absolute; left: calc(50% + 100px); border:0; background: none; font-size:24px; font-weight:600; cursor:pointer;" on:click={pageRight}> ⇨ </button>
             {/if}
         </div>
+-->
     </main>
     
-    <style>
+<style>
     main {
         padding: 1em;
         margin: 0 auto;
@@ -218,6 +277,14 @@
         background: rgba(0,0,0,0.05);
         font-size: 1.1em;
     }
+
+    #kakaomap {
+        position: relative;
+        width: 500px;
+        height: 400px;
+        top: 50px;
+        left: calc(50% - 500px / 2);
+    }
     
     #label_container {
         position: relative;
@@ -231,8 +298,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        border-right: 1px solid black;
         font-size: 1em;
+        cursor: pointer;
     }
     .delete {
         border: 0px;
@@ -242,7 +309,7 @@
     }
     #container {
         position: relative;
-        width: 80%;
+        width: 35%;
         left: 10%;
         overflow-x: hidden;
         overflow-y: scroll;
@@ -258,6 +325,5 @@
         main {
             max-width: none;
         }
-    }
-    
-    </style>
+    }    
+</style>

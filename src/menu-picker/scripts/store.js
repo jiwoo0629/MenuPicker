@@ -2,6 +2,8 @@ import { writable } from "svelte/store";
 
 export const menuStore = writable();
 
+export const kakaoAPI = "e4b602cc8cdc7b113132bd484a0b2b07";
+
 //가게명, 카테고리, 간단한 설명, 방문날짜, 중복여부(일주일)
 export const defaultMenu = [
   {
